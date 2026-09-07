@@ -7,9 +7,12 @@ LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 class Settings(BaseSettings):
-    LOG_LEVEL: LogLevel = "INFO"
-
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    LOG_LEVEL: LogLevel = "INFO"
+    OPENAI_BASE_URL: str
+    OPENAI_API_KEY: str
+    DATABASE_URL: str
 
     @field_validator("LOG_LEVEL", mode="before")
     @classmethod
@@ -18,5 +21,15 @@ class Settings(BaseSettings):
             return value.strip().upper()
         return value
 
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def validate_database_url(cls, value: str) -> str:
+        if not value.startswith("postgresql+asyncpg://"):
+            raise ValueError(
+                "DATABASE_URL must use the asyncpg driver "
+                "(postgresql+asyncpg://...)"
+            )
+        return value
 
-settings = Settings()
+
+settings = Settings()  # type: ignore[call-arg]

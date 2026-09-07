@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.config import settings
+from app.db import engine
 from app.logging import get_logger, setup_logging
 
 logging_config = setup_logging(settings.LOG_LEVEL)
@@ -13,6 +14,8 @@ logger = get_logger("main")
 async def lifespan(_app: FastAPI):
     logger.info("Starting ARIMA Server (log_level=%s)", settings.LOG_LEVEL)
     yield
+    logger.info("Stopping ARIMA Server")
+    await engine.dispose()
     logger.info("Shutting down ARIMA Server")
 
 
